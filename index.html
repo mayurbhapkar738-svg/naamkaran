@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Naamkaran — Indian Baby Names</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Yatra+One&family=Mukta:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root{
+    --ink:#12142A;
+    --ink-soft:#1C2044;
+    --ink-softer:#242953;
+    --marigold:#E9A94A;
+    --vermilion:#C1495A;
+    --teal:#2F7A73;
+    --parchment:#F4ECDA;
+    --parchment-dim:#C9C4B4;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0; padding:0;
+    background:var(--ink);
+    color:var(--parchment);
+    font-family:'Mukta',sans-serif;
+    min-height:100vh;
+  }
+
+  body{
+    background-image:
+      radial-gradient(1px 1px at 10% 15%, rgba(244,236,218,0.35), transparent),
+      radial-gradient(1px 1px at 25% 60%, rgba(244,236,218,0.25), transparent),
+      radial-gradient(1.5px 1.5px at 40% 30%, rgba(233,169,74,0.4), transparent),
+      radial-gradient(1px 1px at 60% 80%, rgba(244,236,218,0.3), transparent),
+      radial-gradient(1.5px 1.5px at 75% 20%, rgba(233,169,74,0.3), transparent),
+      radial-gradient(1px 1px at 85% 55%, rgba(244,236,218,0.25), transparent),
+      radial-gradient(1px 1px at 92% 85%, rgba(244,236,218,0.3), transparent),
+      radial-gradient(1.5px 1.5px at 15% 90%, rgba(233,169,74,0.25), transparent);
+    background-attachment:fixed;
+  }
+
+  .wrap{
+    max-width:920px;
+    margin:0 auto;
+    padding:40px 20px 80px;
+  }
+
+  /* ---------- LANGUAGE BAR ---------- */
+  .lang-bar{
+    display:flex;
+    justify-content:center;
+    margin-bottom:26px;
+  }
+  .segmented{
+    display:inline-flex;
+    background:var(--ink-soft);
+    border:1px solid rgba(244,236,218,0.08);
+    border-radius:10px;
+    padding:4px;
+    gap:4px;
+  }
+  .segmented button{
+    border:none;
+    background:transparent;
+    color:var(--parchment-dim);
+    font-family:'Mukta',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    padding:8px 16px;
+    border-radius:7px;
+    cursor:pointer;
+    transition:all 0.15s ease;
+  }
+  .segmented button.active{
+    background:var(--teal);
+    color:var(--parchment);
+  }
+  .segmented.gender-seg button.active{
+    background:var(--vermilion);
+  }
+
+  /* ---------- HERO ---------- */
+  header{
+    text-align:center;
+    margin-bottom:36px;
+  }
+
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.24em;
+    text-transform:uppercase;
+    color:var(--marigold);
+    opacity:0.85;
+    margin-bottom:14px;
+  }
+
+  h1{
+    font-family:'Yatra One', cursive;
+    font-weight:400;
+    font-size:clamp(40px,8vw,64px);
+    margin:0 0 6px;
+    color:var(--parchment);
+    letter-spacing:0.01em;
+  }
+
+  h1 span{
+    color:var(--marigold);
+  }
+
+  .subtitle{
+    font-size:15px;
+    color:var(--parchment-dim);
+    max-width:460px;
+    margin:0 auto;
+    line-height:1.6;
+  }
+
+  /* nakshatra dot strip — 27 lunar mansions, the traditional basis for a birth syllable */
+  .nakshatra-strip{
+    display:flex;
+    justify-content:center;
+    gap:7px;
+    margin:26px 0 4px;
+    flex-wrap:wrap;
+    padding:0 10px;
+  }
+  .nakshatra-strip span{
+    width:5px; height:5px;
+    border-radius:50%;
+    background:var(--parchment-dim);
+    opacity:0.35;
+    animation:twinkle 4.5s ease-in-out infinite;
+  }
+  .nakshatra-strip span:nth-child(3n){ background:var(--marigold); }
+  .nakshatra-strip span:nth-child(5n){ animation-delay:1.2s; }
+  .nakshatra-strip span:nth-child(7n){ animation-delay:2.4s; }
+  .nakshatra-strip span:nth-child(4n){ animation-delay:0.6s; }
+  @keyframes twinkle{
+    0%,100%{ opacity:0.25; transform:scale(1); }
+    50%{ opacity:0.9; transform:scale(1.4); }
+  }
+
+  /* ---------- FORM CARD ---------- */
+  .panel{
+    background:var(--ink-soft);
+    border:1px solid rgba(244,236,218,0.08);
+    border-radius:18px;
+    padding:28px;
+    box-shadow:0 20px 60px -20px rgba(0,0,0,0.6);
+  }
+
+  .field-label{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--parchment-dim);
+    margin-bottom:10px;
+    display:block;
+  }
+
+  .row{ margin-bottom:24px; }
+  .row:last-of-type{ margin-bottom:0; }
+
+  .letters{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+  }
+  .chip{
+    border:1px solid rgba(244,236,218,0.15);
+    background:transparent;
+    color:var(--parchment-dim);
+    font-family:'Mukta',sans-serif;
+    font-size:13px;
+    font-weight:500;
+    padding:7px 12px;
+    border-radius:9px;
+    cursor:pointer;
+    transition:all 0.15s ease;
+  }
+  .chip:hover{ border-color:var(--marigold); color:var(--parchment); }
+  .chip.active{
+    background:var(--marigold);
+    border-color:var(--marigold);
+    color:var(--ink);
+    font-weight:600;
+  }
+  .letters .chip.any{ padding:7px 14px; }
+
+  textarea{
+    width:100%;
+    min-height:88px;
+    resize:vertical;
+    background:var(--ink-softer);
+    border:1px solid rgba(244,236,218,0.1);
+    border-radius:12px;
+    color:var(--parchment);
+    font-family:'Mukta',sans-serif;
+    font-size:14.5px;
+    line-height:1.5;
+    padding:14px 16px;
+    outline:none;
+    transition:border-color 0.15s ease;
+  }
+  textarea::placeholder{ color:rgba(201,196,180,0.55); }
+  textarea:focus{ border-color:var(--marigold); }
+
+  .generate-btn{
+    width:100%;
+    margin-top:26px;
+    padding:15px;
+    border:none;
+    border-radius:12px;
+    background:var(--marigold);
+    color:var(--ink);
+    font-family:'Mukta',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    letter-spacing:0.01em;
+    cursor:pointer;
+    transition:transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .generate-btn:hover:not(:disabled){
+    transform:translateY(-1px);
+    box-shadow:0 10px 24px -8px rgba(233,169,74,0.45);
+  }
+  .generate-btn:disabled{ opacity:0.6; cursor:default; }
+
+  /* ---------- STATES ---------- */
+  .status{
+    text-align:center;
+    padding:50px 20px;
+    color:var(--parchment-dim);
+    font-size:14px;
+  }
+  .status .glow{
+    width:14px; height:14px;
+    border-radius:50%;
+    background:var(--marigold);
+    margin:0 auto 16px;
+    box-shadow:0 0 0 0 rgba(233,169,74,0.6);
+    animation:pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%{ box-shadow:0 0 0 0 rgba(233,169,74,0.5); }
+    70%{ box-shadow:0 0 0 18px rgba(233,169,74,0); }
+    100%{ box-shadow:0 0 0 0 rgba(233,169,74,0); }
+  }
+
+  .error-box{
+    text-align:center;
+    padding:24px;
+    color:var(--vermilion);
+    font-size:13.5px;
+    border:1px solid rgba(193,73,90,0.35);
+    border-radius:12px;
+    margin-top:24px;
+    background:rgba(193,73,90,0.06);
+  }
+
+  /* ---------- RESULTS ---------- */
+  .results-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin:44px 0 6px;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .results-head h2{
+    font-family:'Yatra One', cursive;
+    font-weight:400;
+    font-size:22px;
+    color:var(--parchment);
+    margin:0;
+  }
+  .more-btn{
+    background:none;
+    border:1px solid rgba(244,236,218,0.2);
+    color:var(--parchment-dim);
+    font-family:'JetBrains Mono', monospace;
+    font-size:11.5px;
+    letter-spacing:0.05em;
+    padding:8px 14px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:all 0.15s ease;
+  }
+  .more-btn:hover{ border-color:var(--marigold); color:var(--marigold); }
+
+  .shared-note{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px;
+    color:rgba(201,196,180,0.5);
+    margin:0 0 18px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    gap:16px;
+  }
+
+  .card{
+    position:relative;
+    background:var(--ink-soft);
+    border:1px solid rgba(244,236,218,0.08);
+    border-radius:16px;
+    padding:22px 20px;
+    overflow:hidden;
+    animation:rise 0.5s ease backwards;
+    display:flex;
+    flex-direction:column;
+  }
+  @keyframes rise{
+    from{ opacity:0; transform:translateY(10px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    top:-30px; right:-30px;
+    width:80px; height:80px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(233,169,74,0.18), transparent 70%);
+  }
+
+  .card-name{
+    font-family:'Yatra One', cursive;
+    font-weight:400;
+    font-size:27px;
+    color:var(--marigold);
+    margin:0 0 3px;
+    position:relative;
+  }
+  .card-pronunciation{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11.5px;
+    color:var(--parchment-dim);
+    margin-bottom:14px;
+  }
+
+  .pill-row{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .pill{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    padding:4px 9px;
+    border-radius:6px;
+  }
+  .pill.origin{ background:rgba(47,122,115,0.25); color:#7FD4C9; }
+  .pill.gender{ background:rgba(193,73,90,0.25); color:#E79AA5; }
+
+  .card-meaning{
+    font-size:14px;
+    line-height:1.55;
+    color:var(--parchment);
+    opacity:0.92;
+    margin:0 0 16px;
+    flex-grow:1;
+  }
+
+  .adopt-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding-top:14px;
+    border-top:1px solid rgba(244,236,218,0.08);
+  }
+  .adopt-label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:12.5px;
+    color:var(--parchment-dim);
+    cursor:pointer;
+    user-select:none;
+  }
+  .adopt-label input{
+    width:15px; height:15px;
+    accent-color:var(--marigold);
+    cursor:pointer;
+  }
+  .adopt-count{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:var(--marigold);
+    white-space:nowrap;
+  }
+
+  .empty-state{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--parchment-dim);
+    font-size:14px;
+    line-height:1.6;
+  }
+
+  footer{
+    text-align:center;
+    margin-top:60px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.08em;
+    color:rgba(201,196,180,0.4);
+    text-transform:uppercase;
+  }
+
+  @media (max-width:520px){
+    .panel{ padding:22px 18px; }
+    .adopt-row{ flex-direction:column; align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="lang-bar">
+    <div class="segmented" id="langRow">
+      <button data-val="en" class="active">English</button>
+      <button data-val="hi">हिंदी</button>
+      <button data-val="mr">मराठी</button>
+    </div>
+  </div>
+
+  <header>
+    <div class="eyebrow" id="tEyebrow">naming, rooted in meaning</div>
+    <h1>नामकरण <span>· Naamkaran</span></h1>
+    <p class="subtitle" id="tSubtitle">Every Indian name carries a nakshatra, a virtue, or a story. Tell this agent what you're looking for, and it'll surface names with their real meanings.</p>
+    <div class="nakshatra-strip" id="nakshatraStrip"></div>
+  </header>
+
+  <div class="panel">
+    <div class="row">
+      <label class="field-label" id="tLetterLabel">Starting letter (optional)</label>
+      <div class="letters" id="letterRow"></div>
+    </div>
+
+    <div class="row">
+      <label class="field-label" id="tGenderLabel">For a</label>
+      <div class="segmented gender-seg" id="genderRow">
+        <button data-val="Any" class="active" data-i18n="genderAny">Any</button>
+        <button data-val="Boy" data-i18n="genderBoy">Boy</button>
+        <button data-val="Girl" data-i18n="genderGirl">Girl</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="field-label" id="tFreeLabel">Or just describe what you have in mind</label>
+      <textarea id="freeText"></textarea>
+    </div>
+
+    <button class="generate-btn" id="generateBtn">Suggest names</button>
+  </div>
+
+  <div id="resultsArea"></div>
+
+  <footer id="tFooter">generated with claude · verify meanings that matter deeply to you</footer>
+</div>
+
+<script>
+  // ============ BACKEND CONFIG ============
+  // Set this to your deployed Cloudflare Worker URL, e.g.
+  // "https://naamkaran-backend.yourname.workers.dev"
+  const WORKER_URL = "https://naamkaran-backend.yourname.workers.dev";
+
+  // ============ TRANSLATIONS ============
+  const I18N = {
+    en: {
+      eyebrow: "naming, rooted in meaning",
+      subtitle: "Every Indian name carries a nakshatra, a virtue, or a story. Tell this agent what you're looking for, and it'll surface names with their real meanings.",
+      letterLabel: "Starting letter (optional)",
+      genderLabel: "For a",
+      genderAny: "Any", genderBoy: "Boy", genderGirl: "Girl",
+      freeLabel: "Or just describe what you have in mind",
+      placeholder: "e.g. something Sanskrit-rooted meaning 'radiant' or 'first light', not too common, easy to say in both Hindi and English...",
+      generateBtn: "Suggest names",
+      generatingBtn: "Consulting the stars...",
+      moreBtnLoading: "Finding more...",
+      loadingStatus: "Consulting the stars for the right names...",
+      errorMsg: "Something didn't line up while gathering names. Try generating again.",
+      noNamesMsg: "No names came back. Try adjusting the letter or description.",
+      resultsHead: "Names for you",
+      moreLikeThis: "↻ MORE LIKE THIS",
+      adoptLabel: "I'd pick this name",
+      sharedNote: "Adoption counts are shared across everyone using this tool.",
+      peopleCount: n => n === 1 ? "1 parent has picked this" : `${n} parents have picked this`,
+      footer: "generated with claude · verify meanings that matter deeply to you",
+      langMeaningInstruction: null
+    },
+    hi: {
+      eyebrow: "नामकरण, अर्थ में रचा-बसा",
+      subtitle: "हर भारतीय नाम में एक नक्षत्र, एक गुण या एक कहानी छिपी होती है। आप जो सोच रहे हैं वह बताइए, और यह एजेंट सही अर्थ वाले नाम ढूंढ देगा।",
+      letterLabel: "शुरुआती अक्षर (वैकल्पिक)",
+      genderLabel: "किसके लिए",
+      genderAny: "कोई भी", genderBoy: "लड़का", genderGirl: "लड़की",
+      freeLabel: "या अपने मन की बात लिखें",
+      placeholder: "जैसे — संस्कृत मूल का नाम जिसका अर्थ 'तेजस्वी' हो, बहुत आम न हो, हिंदी और अंग्रेज़ी दोनों में बोलने में आसान हो...",
+      generateBtn: "नाम सुझाएं",
+      generatingBtn: "सितारों से पूछ रहे हैं...",
+      moreBtnLoading: "और खोज रहे हैं...",
+      loadingStatus: "सही नामों के लिए सितारों से पूछा जा रहा है...",
+      errorMsg: "कुछ गड़बड़ हो गई। कृपया फिर से प्रयास करें।",
+      noNamesMsg: "कोई नाम नहीं मिला। अक्षर या विवरण बदलकर देखें।",
+      resultsHead: "आपके लिए नाम",
+      moreLikeThis: "↻ और नाम दिखाएं",
+      adoptLabel: "मुझे यह नाम पसंद है",
+      sharedNote: "यह गिनती इस टूल के सभी उपयोगकर्ताओं के बीच साझा होती है।",
+      peopleCount: n => n === 1 ? "1 अभिभावक ने यह नाम चुना है" : `${n} अभिभावकों ने यह नाम चुना है`,
+      footer: "क्लॉड द्वारा तैयार · गहराई से जुड़े अर्थों की पुष्टि स्वयं करें",
+      langMeaningInstruction: "Write the 'meaning' field in Hindi (Devanagari script)."
+    },
+    mr: {
+      eyebrow: "नामकरण, अर्थपूर्ण नावं",
+      subtitle: "प्रत्येक भारतीय नावामागे एक नक्षत्र, एक गुण किंवा एक कथा असते. तुम्हाला काय हवं आहे ते सांगा, आणि हा एजंट योग्य अर्थाची नावं शोधून देईल.",
+      letterLabel: "सुरुवातीचं अक्षर (ऐच्छिक)",
+      genderLabel: "कोणासाठी",
+      genderAny: "कोणतंही", genderBoy: "मुलगा", genderGirl: "मुलगी",
+      freeLabel: "किंवा तुमच्या मनात काय आहे ते लिहा",
+      placeholder: "उदा. संस्कृत मूळ असलेलं नाव, ज्याचा अर्थ 'तेजस्वी' असेल, फार सामान्य नसेल, मराठी आणि इंग्रजीत सहज बोलता येईल असं...",
+      generateBtn: "नावं सुचवा",
+      generatingBtn: "ताऱ्यांना विचारत आहोत...",
+      moreBtnLoading: "आणखी शोधत आहोत...",
+      loadingStatus: "योग्य नावांसाठी ताऱ्यांना विचारलं जात आहे...",
+      errorMsg: "काहीतरी बिघडलं. कृपया पुन्हा प्रयत्न करा.",
+      noNamesMsg: "कोणतीही नावं मिळाली नाहीत. अक्षर किंवा वर्णन बदलून पाहा.",
+      resultsHead: "तुमच्यासाठी नावं",
+      moreLikeThis: "↻ आणखी नावं दाखवा",
+      adoptLabel: "मला हे नाव आवडलं",
+      sharedNote: "ही मोजणी या टूलच्या सर्व वापरकर्त्यांमध्ये सामायिक आहे.",
+      peopleCount: n => n === 1 ? "1 पालकाने हे नाव निवडलं आहे" : `${n} पालकांनी हे नाव निवडलं आहे`,
+      footer: "क्लॉडने तयार केलं · मनाला भिडणाऱ्या अर्थांची स्वतः खात्री करा",
+      langMeaningInstruction: "Write the 'meaning' field in Marathi (Devanagari script)."
+    }
+  };
+
+  let currentLang = 'en';
+
+  function applyTranslations(){
+    const t = I18N[currentLang];
+    document.getElementById('tEyebrow').textContent = t.eyebrow;
+    document.getElementById('tSubtitle').textContent = t.subtitle;
+    document.getElementById('tLetterLabel').textContent = t.letterLabel;
+    document.getElementById('tGenderLabel').textContent = t.genderLabel;
+    document.getElementById('tFreeLabel').textContent = t.freeLabel;
+    document.getElementById('freeText').placeholder = t.placeholder;
+    document.getElementById('tFooter').textContent = t.footer;
+    generateBtn.textContent = t.generateBtn;
+    document.querySelectorAll('#genderRow button').forEach(btn=>{
+      const key = btn.dataset.i18n;
+      if(key) btn.textContent = t[key];
+    });
+  }
+
+  // ---- language switcher ----
+  const langRow = document.getElementById('langRow');
+  [...langRow.children].forEach(btn=>{
+    btn.onclick = () => {
+      currentLang = btn.dataset.val;
+      [...langRow.children].forEach(c=>c.classList.remove('active'));
+      btn.classList.add('active');
+      applyTranslations();
+    };
+  });
+
+  // ---- nakshatra dot strip (27 lunar mansions — decorative, thematic) ----
+  const strip = document.getElementById('nakshatraStrip');
+  for(let i=0;i<27;i++){
+    const s = document.createElement('span');
+    strip.appendChild(s);
+  }
+
+  // ---- letter chips ----
+  const letterRow = document.getElementById('letterRow');
+  const letters = ['Any','A','B','C','D','E','G','H','I','J','K','L','M','N','O','P','R','S','T','U','V'];
+  let selectedLetter = 'Any';
+  letters.forEach(l=>{
+    const btn = document.createElement('button');
+    btn.className = 'chip' + (l==='Any' ? ' any active' : '');
+    btn.textContent = l;
+    btn.dataset.val = l;
+    btn.onclick = () => {
+      selectedLetter = l;
+      [...letterRow.children].forEach(c=>c.classList.remove('active'));
+      btn.classList.add('active');
+    };
+    letterRow.appendChild(btn);
+  });
+
+  // ---- gender segmented control ----
+  let selectedGender = 'Any';
+  const genderRow = document.getElementById('genderRow');
+  [...genderRow.children].forEach(btn=>{
+    btn.onclick = () => {
+      selectedGender = btn.dataset.val;
+      [...genderRow.children].forEach(c=>c.classList.remove('active'));
+      btn.classList.add('active');
+    };
+  });
+
+  const freeText = document.getElementById('freeText');
+  const generateBtn = document.getElementById('generateBtn');
+  const resultsArea = document.getElementById('resultsArea');
+
+  generateBtn.addEventListener('click', () => generate(false));
+
+  async function generate(isMore){
+    const t = I18N[currentLang];
+    const description = freeText.value.trim();
+
+    let instructions = `Suggest 8 real, culturally authentic Indian baby names.`;
+    if(selectedLetter !== 'Any'){
+      instructions += ` Every name must start with the letter "${selectedLetter}".`;
+    }
+    if(selectedGender !== 'Any'){
+      instructions += ` All names should be suitable for a ${selectedGender.toLowerCase()}.`;
+    } else {
+      instructions += ` Include a mix of names for boys and girls, unless the free-text description implies otherwise.`;
+    }
+    if(description){
+      instructions += ` The person also shared this in their own words: "${description}". Weight this heavily — infer their intent (style, region, meaning, sound) from it.`;
+    }
+    instructions += ` Draw from across Indian traditions and languages — Sanskrit, Hindi, Tamil, Telugu, Bengali, Punjabi, Marathi, Kannada, Malayalam, Urdu, etc — don't default only to North Indian Sanskrit names unless the input points that way. Avoid repeating extremely overused names unless they're a strong fit. If this is a repeat "more" request, give 8 DIFFERENT names than typical top picks.`;
+    if(t.langMeaningInstruction){
+      instructions += ` ${t.langMeaningInstruction} Keep the "name" field itself in Latin script.`;
+    }
+    instructions += `
+
+Respond with ONLY a raw JSON array, no markdown fences, no preamble, no commentary. Each item must have exactly these fields:
+{"name": "string", "pronunciation": "simple phonetic guide like 'AH-nya'", "origin": "language/region, e.g. 'Sanskrit' or 'Tamil'", "gender": "Boy, Girl, or Unisex", "meaning": "1-2 sentence meaning and why it's meaningful, in plain English"}`;
+
+    generateBtn.disabled = true;
+    generateBtn.textContent = isMore ? t.moreBtnLoading : t.generatingBtn;
+
+    resultsArea.innerHTML = `
+      <div class="status">
+        <div class="glow"></div>
+        ${t.loadingStatus}
+      </div>
+    `;
+
+    try{
+      const response = await fetch(`${WORKER_URL}/api/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: instructions })
+      });
+
+      if(!response.ok) throw new Error('Worker request failed: ' + response.status);
+
+      const data = await response.json();
+      if(!data.text) throw new Error('No response text');
+
+      let cleaned = data.text.trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+      const names = JSON.parse(cleaned);
+
+      await renderResults(names);
+    }catch(err){
+      console.error(err);
+      resultsArea.innerHTML = `<div class="error-box">${t.errorMsg}</div>`;
+    }finally{
+      generateBtn.disabled = false;
+      generateBtn.textContent = t.generateBtn;
+    }
+  }
+
+  // ============ ADOPTION COUNTER (Cloudflare Worker + KV) ============
+  async function getAdoptCount(name){
+    try{
+      const res = await fetch(`${WORKER_URL}/api/count?name=${encodeURIComponent(name)}`);
+      if(!res.ok) return 0;
+      const data = await res.json();
+      return data.count || 0;
+    }catch(e){
+      return 0;
+    }
+  }
+
+  async function bumpAdoptCount(name, delta){
+    try{
+      const res = await fetch(`${WORKER_URL}/api/count`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, delta })
+      });
+      if(!res.ok) throw new Error('count update failed');
+      const data = await res.json();
+      return data.count;
+    }catch(e){
+      console.error('count update error', e);
+      return null;
+    }
+  }
+
+  async function renderResults(names){
+    const t = I18N[currentLang];
+
+    if(!Array.isArray(names) || names.length === 0){
+      resultsArea.innerHTML = `<div class="error-box">${t.noNamesMsg}</div>`;
+      return;
+    }
+
+    const cardsHtml = names.map((n, i) => `
+      <div class="card" style="animation-delay:${i*0.05}s" data-name="${escapeHtml(n.name || '')}">
+        <div class="card-name">${escapeHtml(n.name || '')}</div>
+        <div class="card-pronunciation">${escapeHtml(n.pronunciation || '')}</div>
+        <div class="pill-row">
+          <span class="pill origin">${escapeHtml(n.origin || '')}</span>
+          <span class="pill gender">${escapeHtml(n.gender || '')}</span>
+        </div>
+        <p class="card-meaning">${escapeHtml(n.meaning || '')}</p>
+        <div class="adopt-row">
+          <label class="adopt-label">
+            <input type="checkbox" class="adopt-check" data-name="${escapeHtml(n.name || '')}">
+            <span class="adopt-label-text">${t.adoptLabel}</span>
+          </label>
+          <span class="adopt-count" data-count-for="${escapeHtml(n.name || '')}">···</span>
+        </div>
+      </div>
+    `).join('');
+
+    resultsArea.innerHTML = `
+      <div class="results-head">
+        <h2>${t.resultsHead}</h2>
+        <button class="more-btn" id="moreBtn">${t.moreLikeThis}</button>
+      </div>
+      <p class="shared-note">${t.sharedNote}</p>
+      <div class="grid">${cardsHtml}</div>
+    `;
+
+    document.getElementById('moreBtn').onclick = () => generate(true);
+
+    // wire up adoption checkboxes + fetch live counts
+    const cards = resultsArea.querySelectorAll('.card');
+    cards.forEach(card => {
+      const name = card.dataset.name;
+      const checkbox = card.querySelector('.adopt-check');
+      const countEl = card.querySelector('.adopt-count');
+
+      getAdoptCount(name).then(count => {
+        countEl.textContent = I18N[currentLang].peopleCount(count);
+        countEl.dataset.current = count;
+      });
+
+      checkbox.addEventListener('change', async () => {
+        checkbox.disabled = true;
+        const delta = checkbox.checked ? 1 : -1;
+        const next = await bumpAdoptCount(name, delta);
+        if(next !== null){
+          countEl.textContent = I18N[currentLang].peopleCount(next);
+          countEl.dataset.current = next;
+        } else {
+          checkbox.checked = !checkbox.checked; // revert on failure
+        }
+        checkbox.disabled = false;
+      });
+    });
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // initialize UI copy
+  applyTranslations();
+</script>
+
+</body>
+</html>
