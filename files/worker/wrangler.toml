@@ -1,0 +1,15 @@
+name = "naamkaran-backend"
+main = "src/index.js"
+compatibility_date = "2026-08-19"
+
+# Set this to your GitHub Pages URL once you know it, e.g.
+# https://yourusername.github.io
+[vars]
+ALLOWED_ORIGIN = "https://yourusername.github.io"
+GEMINI_MODEL = "gemini-2.5-flash"
+
+# Create with: wrangler kv namespace create NAMES_KV
+# Then paste the returned id below.
+[[kv_namespaces]]
+binding = "NAMES_KV"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
