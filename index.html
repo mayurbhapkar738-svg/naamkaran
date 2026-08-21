@@ -457,7 +457,7 @@
     </div>
 
     <div class="row">
-      <label class="field-label" id="tReligionLabel">Tradition (optional)</label>
+      <label class="field-label" id="tReligionLabel">Tradition (Hindu by default)</label>
       <div class="letters" id="religionRow"></div>
     </div>
 
@@ -488,7 +488,7 @@
       letterLabel: "Starting letter (optional)",
       genderLabel: "For a",
       genderAny: "Any", genderBoy: "Boy", genderGirl: "Girl",
-      religionLabel: "Tradition (optional)",
+      religionLabel: "Tradition (Hindu by default)",
       freeLabel: "Or just describe what you have in mind",
       placeholder: "e.g. something Sanskrit-rooted meaning 'radiant' or 'first light', not too common, easy to say in both Hindi and English...",
       generateBtn: "Suggest names",
@@ -511,7 +511,7 @@
       letterLabel: "शुरुआती अक्षर (वैकल्पिक)",
       genderLabel: "किसके लिए",
       genderAny: "कोई भी", genderBoy: "लड़का", genderGirl: "लड़की",
-      religionLabel: "परंपरा (वैकल्पिक)",
+      religionLabel: "परंपरा (डिफ़ॉल्ट रूप से हिंदू)",
       freeLabel: "या अपने मन की बात लिखें",
       placeholder: "जैसे — संस्कृत मूल का नाम जिसका अर्थ 'तेजस्वी' हो, बहुत आम न हो, हिंदी और अंग्रेज़ी दोनों में बोलने में आसान हो...",
       generateBtn: "नाम सुझाएं",
@@ -534,7 +534,7 @@
       letterLabel: "सुरुवातीचं अक्षर (ऐच्छिक)",
       genderLabel: "कोणासाठी",
       genderAny: "कोणतंही", genderBoy: "मुलगा", genderGirl: "मुलगी",
-      religionLabel: "परंपरा (ऐच्छिक)",
+      religionLabel: "परंपरा (डीफॉल्टनुसार हिंदू)",
       freeLabel: "किंवा तुमच्या मनात काय आहे ते लिहा",
       placeholder: "उदा. संस्कृत मूळ असलेलं नाव, ज्याचा अर्थ 'तेजस्वी' असेल, फार सामान्य नसेल, मराठी आणि इंग्रजीत सहज बोलता येईल असं...",
       generateBtn: "नावं सुचवा",
@@ -610,11 +610,11 @@
   // ---- gender segmented control ----
   // ---- religion/tradition chips ----
   const religionRow = document.getElementById('religionRow');
-  const religions = ['Any','Hindu','Muslim','Sikh','Christian','Jain','Parsi','Buddhist'];
-  let selectedReligion = 'Any';
+  const religions = ['Hindu','Muslim','Sikh','Christian','Jain','Parsi','Buddhist'];
+  let selectedReligion = 'Hindu';
   religions.forEach(r=>{
     const btn = document.createElement('button');
-    btn.className = 'chip' + (r==='Any' ? ' any active' : '');
+    btn.className = 'chip' + (r==='Hindu' ? ' any active' : '');
     btn.textContent = r;
     btn.dataset.val = r;
     btn.onclick = () => {
@@ -657,11 +657,7 @@
     if(description){
       instructions += ` The person also shared this in their own words: "${description}". Weight this heavily — infer their intent (style, region, meaning, sound) from it.`;
     }
-    if(selectedReligion !== 'Any'){
-      instructions += ` All names should fit ${selectedReligion} naming traditions specifically.`;
-    } else {
-      instructions += ` India is religiously diverse — draw names from across Hindu, Muslim, Sikh, Christian, Jain, Parsi, Buddhist, and other Indian traditions, not just Hindu/Sanskrit ones, unless the person's description points to one in particular. Also vary across languages and regions — Sanskrit, Hindi, Tamil, Telugu, Bengali, Punjabi, Marathi, Kannada, Malayalam, Urdu, Arabic-Persian-rooted names common in Indian Muslim communities, etc.`;
-    }
+    instructions += ` All names should fit ${selectedReligion} naming traditions specifically — do not include names from other religious traditions. Vary across languages and regions within that (e.g. Sanskrit, Hindi, Tamil, Telugu, Bengali, Punjabi, Marathi, Kannada, Malayalam) as fits ${selectedReligion} naming practices.`;
     instructions += ` Avoid repeating extremely overused names unless they're a strong fit. If this is a repeat "more" request, give 8 DIFFERENT names than typical top picks.`;
     if(t.langMeaningInstruction){
       instructions += ` ${t.langMeaningInstruction} Keep the "name" field itself in Latin script.`;
