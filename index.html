@@ -457,6 +457,11 @@
     </div>
 
     <div class="row">
+      <label class="field-label" id="tReligionLabel">Tradition (optional)</label>
+      <div class="letters" id="religionRow"></div>
+    </div>
+
+    <div class="row">
       <label class="field-label" id="tFreeLabel">Or just describe what you have in mind</label>
       <textarea id="freeText"></textarea>
     </div>
@@ -473,7 +478,7 @@
   // ============ BACKEND CONFIG ============
   // Set this to your deployed Cloudflare Worker URL, e.g.
   // "https://naamkaran-backend.yourname.workers.dev"
- const WORKER_URL = "https://naamkaran-backend.mayurbhapkar738.workers.dev";
+  const WORKER_URL = "https://naamkaran-backend.yourname.workers.dev";
 
   // ============ TRANSLATIONS ============
   const I18N = {
@@ -483,6 +488,7 @@
       letterLabel: "Starting letter (optional)",
       genderLabel: "For a",
       genderAny: "Any", genderBoy: "Boy", genderGirl: "Girl",
+      religionLabel: "Tradition (optional)",
       freeLabel: "Or just describe what you have in mind",
       placeholder: "e.g. something Sanskrit-rooted meaning 'radiant' or 'first light', not too common, easy to say in both Hindi and English...",
       generateBtn: "Suggest names",
@@ -505,6 +511,7 @@
       letterLabel: "शुरुआती अक्षर (वैकल्पिक)",
       genderLabel: "किसके लिए",
       genderAny: "कोई भी", genderBoy: "लड़का", genderGirl: "लड़की",
+      religionLabel: "परंपरा (वैकल्पिक)",
       freeLabel: "या अपने मन की बात लिखें",
       placeholder: "जैसे — संस्कृत मूल का नाम जिसका अर्थ 'तेजस्वी' हो, बहुत आम न हो, हिंदी और अंग्रेज़ी दोनों में बोलने में आसान हो...",
       generateBtn: "नाम सुझाएं",
@@ -527,6 +534,7 @@
       letterLabel: "सुरुवातीचं अक्षर (ऐच्छिक)",
       genderLabel: "कोणासाठी",
       genderAny: "कोणतंही", genderBoy: "मुलगा", genderGirl: "मुलगी",
+      religionLabel: "परंपरा (ऐच्छिक)",
       freeLabel: "किंवा तुमच्या मनात काय आहे ते लिहा",
       placeholder: "उदा. संस्कृत मूळ असलेलं नाव, ज्याचा अर्थ 'तेजस्वी' असेल, फार सामान्य नसेल, मराठी आणि इंग्रजीत सहज बोलता येईल असं...",
       generateBtn: "नावं सुचवा",
@@ -553,6 +561,7 @@
     document.getElementById('tSubtitle').textContent = t.subtitle;
     document.getElementById('tLetterLabel').textContent = t.letterLabel;
     document.getElementById('tGenderLabel').textContent = t.genderLabel;
+    document.getElementById('tReligionLabel').textContent = t.religionLabel;
     document.getElementById('tFreeLabel').textContent = t.freeLabel;
     document.getElementById('freeText').placeholder = t.placeholder;
     document.getElementById('tFooter').textContent = t.footer;
@@ -599,6 +608,23 @@
   });
 
   // ---- gender segmented control ----
+  // ---- religion/tradition chips ----
+  const religionRow = document.getElementById('religionRow');
+  const religions = ['Any','Hindu','Muslim','Sikh','Christian','Jain','Parsi','Buddhist'];
+  let selectedReligion = 'Any';
+  religions.forEach(r=>{
+    const btn = document.createElement('button');
+    btn.className = 'chip' + (r==='Any' ? ' any active' : '');
+    btn.textContent = r;
+    btn.dataset.val = r;
+    btn.onclick = () => {
+      selectedReligion = r;
+      [...religionRow.children].forEach(c=>c.classList.remove('active'));
+      btn.classList.add('active');
+    };
+    religionRow.appendChild(btn);
+  });
+
   let selectedGender = 'Any';
   const genderRow = document.getElementById('genderRow');
   [...genderRow.children].forEach(btn=>{
@@ -631,7 +657,12 @@
     if(description){
       instructions += ` The person also shared this in their own words: "${description}". Weight this heavily — infer their intent (style, region, meaning, sound) from it.`;
     }
-    instructions += ` Draw from across Indian traditions and languages — Sanskrit, Hindi, Tamil, Telugu, Bengali, Punjabi, Marathi, Kannada, Malayalam, Urdu, etc — don't default only to North Indian Sanskrit names unless the input points that way. Avoid repeating extremely overused names unless they're a strong fit. If this is a repeat "more" request, give 8 DIFFERENT names than typical top picks.`;
+    if(selectedReligion !== 'Any'){
+      instructions += ` All names should fit ${selectedReligion} naming traditions specifically.`;
+    } else {
+      instructions += ` India is religiously diverse — draw names from across Hindu, Muslim, Sikh, Christian, Jain, Parsi, Buddhist, and other Indian traditions, not just Hindu/Sanskrit ones, unless the person's description points to one in particular. Also vary across languages and regions — Sanskrit, Hindi, Tamil, Telugu, Bengali, Punjabi, Marathi, Kannada, Malayalam, Urdu, Arabic-Persian-rooted names common in Indian Muslim communities, etc.`;
+    }
+    instructions += ` Avoid repeating extremely overused names unless they're a strong fit. If this is a repeat "more" request, give 8 DIFFERENT names than typical top picks.`;
     if(t.langMeaningInstruction){
       instructions += ` ${t.langMeaningInstruction} Keep the "name" field itself in Latin script.`;
     }
