@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mayurbhapkar738-svg.github.io/naamkaran/sitemap.xml
