@@ -2,13 +2,12 @@
  * Naamkaran backend — Cloudflare Worker
  *
  * Two jobs:
- *  1. POST /api/generate   -> calls the Google Gemini API server-side
+ *  1. POST /api/generate   -> runs Gemini 3.7 Flash through Cloudflare Workers AI
  *  2. GET  /api/count      -> reads the shared adoption count for a name
  *     POST /api/count      -> increments/decrements it
  *
  * Required Cloudflare setup:
- *  - Secret: GEMINI_API_KEY
- *  - Var: GEMINI_MODEL (set to gemini-3.7-flash)
+ *  - Workers AI binding: AI
  *  - KV binding: NAMES_KV
  *  - Var: ALLOWED_ORIGIN (your GitHub Pages origin)
  */
@@ -43,7 +42,7 @@ export default {
       return new Response(null, { headers });
     }
 
-    // ---- Generate names via Google Gemini API ----
+    // ---- Generate names via Cloudflare Workers AI / Gemini 3.7 Flash ----
     if (url.pathname === "/api/generate" && request.method === "POST") {
       try {
         const { prompt } = await request.json();
@@ -55,64 +54,32 @@ export default {
           });
         }
 
-        if (!env.GEMINI_API_KEY) {
-          console.error("GEMINI_API_KEY is not configured");
-          return new Response(JSON.stringify({ error: "Gemini API key is not configured" }), {
-            status: 500,
-            headers: { ...headers, "Content-Type": "application/json" },
-          });
+        if (!env.AI) {
+          throw new Error("Workers AI binding 'AI' is not configured");
         }
 
-        const model = env.GEMINI_MODEL || "gemini-3.7-flash";
-
-        const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-goog-api-key": env.GEMINI_API_KEY,
-            },
-            body: JSON.stringify({
-              contents: [
-                {
-                  role: "user",
-                  parts: [{ text: prompt }],
-                },
-              ],
-            }),
-          }
-        );
-
-        const responseText = await geminiRes.text();
-        let data;
-        try {
-          data = JSON.parse(responseText);
-        } catch {
-          data = null;
-        }
-
-        if (!geminiRes.ok) {
-          console.error("Gemini API error", geminiRes.status, responseText);
-          return new Response(
-            JSON.stringify({
-              error: "Gemini request failed",
-              upstream_status: geminiRes.status,
-              detail: data?.error?.message || responseText.slice(0, 1000),
-            }),
+        const result = await env.AI.run("google/gemini-3.7-flash", {
+          contents: [
             {
-              status: geminiRes.status >= 400 && geminiRes.status < 500 ? geminiRes.status : 502,
-              headers: { ...headers, "Content-Type": "application/json" },
-            }
-          );
-        }
+              role: "user",
+              parts: [{ text: prompt }],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.9,
+          },
+        });
 
-        const text = data?.candidates?.[0]?.content?.parts
-          ?.map((part) => part?.text || "")
-          .join("") || "";
+        const text =
+          result?.candidates?.[0]?.content?.parts
+            ?.map((part) => part?.text || "")
+            .join("") ||
+          result?.response ||
+          result?.text ||
+          "";
 
         if (!text) {
-          console.error("Gemini returned no generated text", data);
+          console.error("Workers AI returned no generated text", result);
           return new Response(
             JSON.stringify({ error: "Gemini returned no generated text" }),
             {
@@ -130,7 +97,7 @@ export default {
         return new Response(
           JSON.stringify({ error: "Gemini generation failed", detail: String(err) }),
           {
-            status: 500,
+            status: 502,
             headers: { ...headers, "Content-Type": "application/json" },
           }
         );
