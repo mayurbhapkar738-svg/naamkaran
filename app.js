@@ -49,7 +49,7 @@
       pinFrompin: "Located from {from}.",
       pinFromdistrict: "Located from {from}. A few kilometres makes no difference to the result.",
       pinFromstate: "Located from {from} only. Add a PIN code to narrow it, though it rarely changes the answer.",
-      famToggle: "Your family — the things a pandit would ask",
+      famToggle: "Your family — the things a {officiant} would ask",
       famIntro: "All optional. Give us what you know and we will use it; leave the rest blank.",
       deityPick: "Choose your kula devata",
       deityOther: "Other / not sure",
@@ -98,6 +98,9 @@
       hintSutra: "Your priest recites this in the same breath as the gotra. It settles the veda shakha exactly, so if you know it there is no need to guess at the shakha.",
       certainVeda: "Veda shakha is {v}. That follows from the {why} sutra \u2014 each sutra belongs to one Veda, so this is not a guess.",
       vedaConflict: "These disagree: {sub} usually means {a}, but the {sutra} sutra means {b}. One of the two answers is wrong \u2014 your priest will know which.",
+      nakOpenHijri: "\u2212 Add the date of birth for the Islamic date and the aqiqah day",
+      nakClosedHijri: "\uFF0B Add the date of birth for the Islamic date and the aqiqah day",
+      calcBtnHijri: "Work out the Islamic date",
       printPatra: "Print this sheet", muhurtaBtn: "Show naming-day options",
       muhurtaTitle: "Days suited to the naming rite",
       muhurtaIntro: "Tradition puts the naming on the eleventh or twelfth day. Where that lands badly, families move it. These are the next few clear days.",
@@ -186,7 +189,7 @@
     pinFrompin: "{from} से स्थान लिया गया।",
     pinFromdistrict: "{from} से स्थान लिया गया। कुछ किलोमीटर से नतीजे में अंतर नहीं पड़ता।",
     pinFromstate: "केवल {from} से स्थान लिया गया। पिन कोड भरने से और सटीक होगा, पर नतीजा प्रायः वही रहता है।",
-    famToggle: "आपका परिवार — जो पंडितजी पूछते हैं",
+    famToggle: "आपका परिवार — जो {officiant} पूछते हैं",
     famIntro: "सब वैकल्पिक। जो पता हो वह बता दें, हम उसका उपयोग करेंगे; बाकी खाली छोड़ दें।",
     deityPick: "अपने कुलदेवता चुनें",
     deityOther: "अन्य / पता नहीं",
@@ -235,6 +238,9 @@
     hintSutra: "पंडितजी इसे गोत्र के साथ ही बोलते हैं। इससे वेद शाखा ठीक-ठीक निकल आती है, इसलिए यह पता हो तो शाखा का अनुमान लगाने की आवश्यकता नहीं।",
     certainVeda: "वेद शाखा {v} है। यह {why} सूत्र से निकलती है — हर सूत्र एक ही वेद का होता है, इसलिए यह अनुमान नहीं है।",
     vedaConflict: "ये मेल नहीं खाते: {sub} का अर्थ सामान्यतः {a} होता है, पर {sutra} सूत्र का अर्थ {b} है। दोनों में से एक उत्तर गलत है — पंडितजी बता सकेंगे कौन सा।",
+    nakOpenHijri: "\u2212 इस्लामी तारीख और अक़ीक़ा के दिन के लिए जन्मतिथि भरें",
+    nakClosedHijri: "\uFF0B इस्लामी तारीख और अक़ीक़ा के दिन के लिए जन्मतिथि भरें",
+    calcBtnHijri: "इस्लामी तारीख निकालें",
     printPatra: "यह पत्र प्रिंट करें", muhurtaBtn: "नामकरण के दिन देखें",
     muhurtaTitle: "नामकरण के लिए उपयुक्त दिन",
     muhurtaIntro: "परंपरा में नामकरण ग्यारहवें या बारहवें दिन होता है। यदि वह दिन उपयुक्त न हो तो आगे बढ़ाया जाता है। ये अगले शुभ दिन हैं।",
@@ -322,7 +328,7 @@
     pinFrompin: "{from} वरून ठिकाण घेतले.",
     pinFromdistrict: "{from} वरून ठिकाण घेतले. काही किलोमीटरने निकालात बदल होत नाही.",
     pinFromstate: "फक्त {from} वरून ठिकाण घेतले. पिन कोड भरल्यास अधिक नेमके होईल, पण निकाल बहुतेक तोच राहतो.",
-    famToggle: "तुमचे कुटुंब — गुरुजी जे विचारतात",
+    famToggle: "तुमचे कुटुंब — {officiant} जे विचारतात",
     famIntro: "सर्व ऐच्छिक. जे माहीत असेल ते सांगा, आम्ही ते वापरू; बाकी रिकामे ठेवा.",
     deityPick: "तुमचे कुलदैवत निवडा",
     deityOther: "इतर / माहीत नाही",
@@ -371,6 +377,9 @@
     hintSutra: "गुरुजी हे गोत्रासोबतच म्हणतात. यावरून वेद शाखा नेमकी निघते, म्हणून हे माहीत असेल तर शाखेचा अंदाज लावायची गरज नाही.",
     certainVeda: "वेद शाखा {v} आहे. ती {why} सूत्रावरून निघते — प्रत्येक सूत्र एकाच वेदाचे असते, म्हणून हा अंदाज नाही.",
     vedaConflict: "हे जुळत नाहीत: {sub} चा अर्थ सामान्यतः {a} होतो, पण {sutra} सूत्राचा अर्थ {b} आहे. दोघांपैकी एक उत्तर चुकीचे आहे — गुरुजी सांगू शकतील कोणते.",
+    nakOpenHijri: "\u2212 इस्लामी तारीख आणि अकीका दिवसासाठी जन्मतारीख भरा",
+    nakClosedHijri: "\uFF0B इस्लामी तारीख आणि अकीका दिवसासाठी जन्मतारीख भरा",
+    calcBtnHijri: "इस्लामी तारीख काढा",
     printPatra: "हे पत्र छापा", muhurtaBtn: "नामकरणाचे दिवस पहा",
     muhurtaTitle: "नामकरणासाठी योग्य दिवस",
     muhurtaIntro: "परंपरेने नामकरण अकराव्या किंवा बाराव्या दिवशी होते. तो दिवस योग्य नसेल तर पुढे ढकलले जाते. हे पुढील शुभ दिवस आहेत.",
@@ -500,6 +509,23 @@
       $("nakToggle").setAttribute("aria-expanded", "false");
     }
     // the nakshatra panel only means anything for the panchang engine
+    /* The panel has to open for a Hijri birth, because the Islamic date and the
+     * aqiqah day come from the date. But the button that opens it used to read
+     * "Use the birth star (nakshatra) to pick the starting sound" and the one
+     * inside it read "Calculate nakshatra" -- to a Muslim family, for a
+     * calculation that has nothing to do with a birth star. Only the intro
+     * paragraph was ever made tradition-aware. */
+    var hijri = tr.engine === "hijri";
+    setText("nakToggleLabel", $("nakPanel").hidden
+      ? (hijri ? t("nakClosedHijri") : t("nakClosed"))
+      : (hijri ? t("nakOpenHijri") : t("nakOpen")));
+    setText("calcBtn", t(hijri ? "calcBtnHijri" : "calcBtn"));
+
+    /* And it asked for a time and a place it never reads. calcStar no longer
+     * requires them, but leaving the fields on screen still implies they matter. */
+    $("tobWrap").hidden = hijri;
+    $("placeBlock").hidden = hijri;
+
     $("nakIntro").textContent = tr.engine === "hijri"
       ? "The Hijri date of birth and the aqiqah day are worked out from the date. " +
         "Time and place are not needed for that, so leave them blank if you like."
@@ -849,7 +875,7 @@
     $("village").placeholder = t("villagePlaceholder");
     $("pin").placeholder = t("pinPlaceholder");
     setText("lblVillage", t("lblVillage"));
-    setText("famToggleLabel", ($("famPanel").hidden ? "\uFF0B " : "\u2212 ") + t("famToggle"));
+    setText("famToggleLabel", ($("famPanel").hidden ? "\uFF0B " : "\u2212 ") + famToggleText());
     setText("famIntro", t("famIntro"));
     setText("lblDeity", t("lblDeity"));
     setText("lblCommunity", t("lblCommunity"));
@@ -888,7 +914,10 @@
     setText("nakIntro", t("nakIntro"));
     setText("footNote", t("footNote"));
     setText("footFree", t("footFree"));
-    setText("nakToggleLabel", $("nakPanel").hidden ? t("nakClosed") : t("nakOpen"));
+    var hjL = TR.byId(state.tradition).engine === "hijri";
+    setText("nakToggleLabel", $("nakPanel").hidden
+      ? (hjL ? t("nakClosedHijri") : t("nakClosed"))
+      : (hjL ? t("nakOpenHijri") : t("nakOpen")));
     $("thoughts").placeholder = t("thoughtsPlaceholder");
     document.querySelectorAll(".langs button").forEach(function (b) {
       b.setAttribute("aria-pressed", String(b.dataset.lang === state.lang));
@@ -961,8 +990,19 @@
    * and hides it outright otherwise. A Christian or Muslim family should never
    * be asked for a kula devata, and nothing the panel holds should reach the
    * sheet or the generator for them. */
+  /* The family panel is the one place in the form that names the officiant, and
+   * the substitution built for the About section never reached it -- so a Jain
+   * family opening it read "the things a pandit would ask". */
+  function famToggleText() {
+    return t("famToggle").replace(/\{officiant\}/g,
+      TR.officiant(TR.byId(state.tradition), state.lang));
+  }
+
   function applyFamilyScope(tr) {
     var scope = TR.familyScope(tr);
+    /* Refresh the label here too. It was only rebuilt on a language change, so
+     * switching to Jain left the Hindu wording in place. */
+    setText("famToggleLabel", ($("famPanel").hidden ? "\uFF0B " : "\u2212 ") + famToggleText());
     state.familyScope = scope;
     $("famToggle").hidden = scope === "none";
     if (scope === "none") {
@@ -1646,7 +1686,12 @@
       var panel = $("nakPanel"), open = panel.hidden;
       panel.hidden = !open;
       $("nakToggle").setAttribute("aria-expanded", String(open));
-      setText("nakToggleLabel", open ? t("nakOpen") : t("nakClosed"));
+      /* Keep the Hijri wording when the panel is toggled, or opening it would
+       * put "nakshatra" back in front of a Muslim family. */
+      var hj = TR.byId(state.tradition).engine === "hijri";
+      setText("nakToggleLabel", open
+        ? (hj ? t("nakOpenHijri") : t("nakOpen"))
+        : (hj ? t("nakClosedHijri") : t("nakClosed")));
     });
     $("whereChips").addEventListener("click", function (e) {
       var b = e.target.closest("[data-where]");
@@ -1726,7 +1771,7 @@
       var open = $("famPanel").hidden;
       $("famPanel").hidden = !open;
       $("famToggle").setAttribute("aria-expanded", String(open));
-      setText("famToggleLabel", (open ? "\u2212 " : "\uFF0B ") + t("famToggle"));
+      setText("famToggleLabel", (open ? "\u2212 " : "\uFF0B ") + famToggleText());
     });
     $("eldestChips").addEventListener("click", function (e) {
       var b = e.target.closest("[data-eldest]");
