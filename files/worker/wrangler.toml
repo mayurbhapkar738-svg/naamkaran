@@ -2,14 +2,17 @@ name = "naamkaran-backend"
 main = "src/index.js"
 compatibility_date = "2026-08-19"
 
-# Set this to your GitHub Pages URL once you know it, e.g.
-# https://yourusername.github.io
 [vars]
-ALLOWED_ORIGIN = "https://yourusername.github.io"
-GEMINI_MODEL = "gemini-2.5-flash"
+ALLOWED_ORIGIN = "https://mayurbhapkar738-svg.github.io"
 
-# Create with: wrangler kv namespace create NAMES_KV
-# Then paste the returned id below.
+# Cloudflare Workers AI binding.
+[ai]
+binding = "AI"
+
+# Existing KV binding used by /api/count.
+# Keep the namespace ID configured in the Cloudflare dashboard if this file
+# is deployed from GitHub; replace the placeholder below with the real ID
+# before deploying through Wrangler if needed.
 [[kv_namespaces]]
 binding = "NAMES_KV"
 id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
