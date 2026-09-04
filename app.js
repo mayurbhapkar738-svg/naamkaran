@@ -451,6 +451,7 @@
     hint: null,        // a backend guess at the nearest town, pending confirmation
     where: "IN",       // which place path is showing
     sky: null,         // the canvas behind everything
+    familyScope: "full",  // how much of the family panel this tradition uses
     busy: false
   };
 
@@ -489,6 +490,7 @@
    * with a pada syllable, was the thing most worth fixing here. */
   function applyTradition() {
     var tr = TR.byId(state.tradition);
+    applyFamilyScope(tr);
     setText("hintTradition", TR.blurbFor(tr, state.lang));
 
     var wantsBirth = tr.askBirth;
@@ -917,8 +919,22 @@
   }
 
   function calcStar() {
-    if (state.where === "IN") resolveIndia();
     if (!$("dob").value) { say(t("needDate"), true); return; }
+
+    /* The Hijri date and the aqiqah days follow from the date of birth alone.
+     * This function used to demand a time and a place before doing anything,
+     * so a Muslim family who entered only a date -- which is all we ask them
+     * for -- was told to choose a birthplace and could not get past it. The
+     * fields it was insisting on are ones this path never reads. */
+    if (TR.byId(state.tradition).engine === "hijri") {
+      state.star = null;
+      say("");
+      renderStar();
+      renderPatra(null);
+      return;
+    }
+
+    if (state.where === "IN") resolveIndia();
     if (!$("tob").value) { say(t("needTime"), true); return; }
     var coords = currentCoords();
     if (!coords) { say(t("needPlace"), true); $("place").focus(); return; }
@@ -941,6 +957,48 @@
    * form that insists turns them away. But when it is given it is used: the
    * kula devata produces the devata-nama, which is the row of the traditional
    * set that used to read "we cannot know". */
+  /* Shows only as much of the family panel as the tradition actually uses,
+   * and hides it outright otherwise. A Christian or Muslim family should never
+   * be asked for a kula devata, and nothing the panel holds should reach the
+   * sheet or the generator for them. */
+  function applyFamilyScope(tr) {
+    var scope = TR.familyScope(tr);
+    state.familyScope = scope;
+    $("famToggle").hidden = scope === "none";
+    if (scope === "none") {
+      $("famPanel").hidden = true;
+      $("famToggle").setAttribute("aria-expanded", "false");
+    }
+    /* Sutra and veda shakha are Vedic. They do not belong on a Jain or
+     * Buddhist form even though the nakshatra reckoning does. */
+    $("ritualDetails").hidden = scope !== "full";
+    $("subWrap").hidden = scope !== "full" ||
+      !(FM && FM.subcommunities(state.family.community).length);
+  }
+
+  /* The family answers, or nothing at all when the tradition does not use
+   * them. Everything downstream -- the sheet, the sankalpa, the shanti block,
+   * the constraints sent to the generator -- reads this, so returning null is
+   * what keeps a Hindu question out of a Christian result. */
+  function familyIfUsed() {
+    if (state.familyScope === "none") return null;
+    var f = readFamily();
+    if (state.familyScope === "full") { f.scope = "full"; return f; }
+    /* Partial scope: Jain and Buddhist families keep the nakshatra reckoning
+     * and their own naming constraints, but sutra, veda shakha and sampradaya
+     * are Vedic and must not appear on their sheet even if a value is sitting
+     * in a hidden field from an earlier tradition. Copied rather than mutated,
+     * so switching back to Hindu does not find the answers wiped. */
+    var out = { scope: "partial" };
+    for (var k in f) if (f.hasOwnProperty(k)) out[k] = f[k];
+    out.scope = "partial";
+    out.sutra = "";
+    out.vedaShakha = "";
+    out.sampradaya = "";
+    out.subcommunity = "";
+    return out;
+  }
+
   function renderFamily() {
     if (!FM) return;
     var sel = $("deity");
@@ -1108,7 +1166,7 @@
     if (p.error) { clearPatra(); return; }
     var boundary = window.Panchang.padaBoundaryMinutes(opts);
     state.panchang = p;
-    $("patraMount").innerHTML = TR.patraHtml(p, opts, boundary, state.lang, readFamily());
+    $("patraMount").innerHTML = TR.patraHtml(p, opts, boundary, state.lang, familyIfUsed());
     $("patraActions").hidden = false;
     $("muhurtaBtn").hidden = false;
     $("muhurtaMount").innerHTML = "";
@@ -1183,12 +1241,13 @@
     body.engine = TR.byId(state.tradition).engine;
     /* The family answers become explicit constraints rather than prose, so the
      * generator can be told which are hard and which are preferences. */
-    if (FM) {
-      var fc = FM.constraints(readFamily());
+    var famNow = familyIfUsed();
+    if (FM && famNow) {
+      var fc = FM.constraints(famNow);
       if (fc.hard.length) body.mustHonour = fc.hard.map(function (x) { return x.text; });
       if (fc.soft.length) body.preferences = fc.soft.map(function (x) { return x.text; });
       if (fc.avoid.length) body.avoid = fc.avoid;
-      var dn = state.family.deity ? FM.devataNama(state.family.deity, state.gender) : null;
+      var dn = famNow.deity ? FM.devataNama(famNow.deity, state.gender) : null;
       if (dn && dn.names.length) body.deityNames = dn.names;
     }
     return body;
@@ -1222,16 +1281,18 @@
         say(errorMessage(res.status, payload), true);
         return;
       }
-      state.shown = payload.names;
-      payload.names.forEach(function (n) {
+      var clean = cleanNames(payload.names);
+      if (!clean.length) { say(errorMessage(res.status, payload), true); return; }
+      state.shown = clean;
+      clean.forEach(function (n) {
         if (state.seen.indexOf(n.name) === -1) state.seen.push(n.name);
       });
       say(state.star ? fill(t("usingStar"), { s: "" }) : "");
       $("lblResults").hidden = false;
       $("publicNote").hidden = false;
       $("moreBtn").hidden = false;
-      renderResults(payload.names);
-      loadCounts(payload.names.map(function (n) { return n.name; }));
+      renderResults(clean);
+      loadCounts(clean.map(function (n) { return n.name; }));
     } catch (e) {
       say(t("errGeneric"), true);
     } finally {
@@ -1267,6 +1328,26 @@
     html += '<span class="tally" data-tally="' + esc(key) + '">' +
       (tally > 0 ? esc(fill(t("adoptions"), { n: tally })) : "") + "</span></div>";
     return html + "</article>";
+  }
+
+  /* The backend is a language model behind a Worker, so a malformed row is a
+   * question of when, not whether. Sanitising once here means one bad entry
+   * costs that entry rather than the whole response: without it a null in the
+   * array threw into the generic catch and a family saw "something went wrong"
+   * instead of the nineteen good names that came with it, and an object where
+   * a name should be rendered as "[object Object]". */
+  function cleanNames(raw) {
+    if (!Array.isArray(raw)) return [];
+    var str = function (v) { return typeof v === "string" ? v : ""; };
+    return raw.map(function (n) {
+      if (typeof n === "string") n = { name: n };
+      if (!n || typeof n !== "object" || typeof n.name !== "string") return null;
+      var name = n.name.trim();
+      if (!name) return null;
+      return { name: name, script: str(n.script), meaning: str(n.meaning),
+        origin: str(n.origin), pronunciation: str(n.pronunciation),
+        gender: str(n.gender), pairing: str(n.pairing) };
+    }).filter(Boolean);
   }
 
   function renderResults(names) {
@@ -1384,7 +1465,10 @@
       var payload = await res.json();
       if (!res.ok || !payload || !payload.id) { say(t("shareFail"), true); return; }
       var base = CFG.SITE_URL || (location.origin + location.pathname);
-      $("shareLink").value = base.replace(/\?.*$/, "") + "?list=" + payload.id;
+      /* encodeURIComponent, because an id carrying & or = would silently
+       * truncate the link and the recipient would open an empty page. */
+      $("shareLink").value = base.replace(/[?#].*$/, "") +
+        "?list=" + encodeURIComponent(payload.id);
       $("shareRow").hidden = false;
       $("shareLink").select();
     } catch (e) {
@@ -1413,18 +1497,20 @@
     try {
       var res = await fetch(API + "/api/shortlist?id=" + encodeURIComponent(id));
       var payload = await res.json();
-      if (!res.ok || !payload || !payload.names || !payload.names.length) return;
+      if (!res.ok || !payload || !Array.isArray(payload.names) || !payload.names.length) return;
       var when = "";
       try { when = new Date(payload.createdAt).toLocaleDateString(state.lang === "en" ? "en-IN" : (state.lang + "-IN")); }
       catch (e) { when = String(payload.createdAt || "").slice(0, 10); }
       setText("sharedMeta", fill(t("sharedMeta"), { n: payload.names.length, d: when }) +
         (payload.nakshatra ? " " + payload.nakshatra : ""));
       $("sharedBanner").hidden = false;
-      state.shown = payload.names;
+      var sharedClean = cleanNames(payload.names);
+      if (!sharedClean.length) return;
+      state.shown = sharedClean;
       $("lblResults").hidden = false;
       $("publicNote").hidden = false;
-      renderResults(payload.names);
-      loadCounts(payload.names.map(function (n) { return n.name; }));
+      renderResults(sharedClean);
+      loadCounts(sharedClean.map(function (n) { return n.name; }));
     } catch (e) { /* a dead link just shows the normal form */ }
   }
 
@@ -1449,7 +1535,21 @@
     var tr = TR.byId(state.tradition);
     var eng = tr.engine;
     var S = AB.sections(eng);
-    var g = function (path) { return AB.get(L, path); };
+    /* Every About string may carry {officiant}. Filling it here rather than
+     * hardcoding "pandit" is what lets a Jain family read "priest or
+     * astrologer" without a second copy of the whole section. */
+    var who = TR.officiant(tr, L);
+    var fillWho = function (v) {
+      if (typeof v === "string") return v.replace(/\{officiant\}/g, who);
+      if (Array.isArray(v)) return v.map(fillWho);
+      if (v && typeof v === "object") {
+        var o = {};
+        for (var k in v) if (v.hasOwnProperty(k)) o[k] = fillWho(v[k]);
+        return o;
+      }
+      return v;
+    };
+    var g = function (path) { return fillWho(AB.get(L, path)); };
 
     setText("aboutTitle", g("heading"));
     setText("aboutLead", g(S.intro + ".lead"));
