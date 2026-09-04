@@ -2,16 +2,14 @@
  * Naamkaran backend — Cloudflare Worker
  *
  * Two jobs:
- *  1. POST /api/generate   -> proxies to Google Gemini, keeps your API key server-side
+ *  1. POST /api/generate   -> runs Gemini 3.7 Flash through Cloudflare Workers AI
  *  2. GET  /api/count      -> reads the shared adoption count for a name
  *     POST /api/count      -> increments/decrements it
  *
- * Required setup (see README.md in this folder):
- *  - Secret:  GEMINI_API_KEY     (free, no credit card — get it at https://aistudio.google.com/apikey)
- *  - Var:     GEMINI_MODEL       (e.g. "gemini-2.5-flash" — CHECK https://ai.google.dev/gemini-api/docs/pricing
- *                                 for which model currently shows "Free" before deploying; this changes often)
+ * Required setup:
+ *  - Workers AI binding: AI
  *  - KV binding: NAMES_KV
- *  - Var:     ALLOWED_ORIGIN     (your GitHub Pages URL, e.g. https://yourname.github.io)
+ *  - Var: ALLOWED_ORIGIN (your GitHub Pages origin)
  */
 
 function corsHeaders(origin, allowedOrigin) {
@@ -37,52 +35,74 @@ function normalizeKey(name) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    const headers = corsHeaders(request.headers.get("Origin") || "", env.ALLOWED_ORIGIN);
+    const origin = request.headers.get("Origin") || "";
+    const headers = corsHeaders(origin, env.ALLOWED_ORIGIN);
 
     if (request.method === "OPTIONS") {
       return new Response(null, { headers });
     }
 
-    // ---- Generate names via Gemini ----
+    // ---- Generate names via Cloudflare Workers AI / Gemini 3.7 Flash ----
     if (url.pathname === "/api/generate" && request.method === "POST") {
       try {
         const { prompt } = await request.json();
-        const model = env.GEMINI_MODEL || "gemini-2.5-flash";
 
-        const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-goog-api-key": env.GEMINI_API_KEY,
-            },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: { temperature: 0.9 },
-            }),
-          }
-        );
-
-        if (!geminiRes.ok) {
-          const errText = await geminiRes.text();
-          return new Response(JSON.stringify({ error: "Gemini request failed", detail: errText }), {
-            status: 502,
+        if (!prompt || typeof prompt !== "string") {
+          return new Response(JSON.stringify({ error: "prompt required" }), {
+            status: 400,
             headers: { ...headers, "Content-Type": "application/json" },
           });
         }
 
-        const data = await geminiRes.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        if (!env.AI) {
+          throw new Error("Workers AI binding 'AI' is not configured");
+        }
+
+        const result = await env.AI.run("google/gemini-3.7-flash", {
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: prompt }],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.9,
+          },
+        });
+
+        // Gemini-style response. Keep a fallback for compatible Workers AI
+        // response formats so a platform response wrapper does not break the UI.
+        const text =
+          result?.candidates?.[0]?.content?.parts
+            ?.map((part) => part?.text || "")
+            .join("") ||
+          result?.response ||
+          result?.text ||
+          "";
+
+        if (!text) {
+          console.error("Workers AI returned no generated text", result);
+          return new Response(
+            JSON.stringify({ error: "AI returned no generated text" }),
+            {
+              status: 502,
+              headers: { ...headers, "Content-Type": "application/json" },
+            }
+          );
+        }
 
         return new Response(JSON.stringify({ text }), {
           headers: { ...headers, "Content-Type": "application/json" },
         });
       } catch (err) {
-        return new Response(JSON.stringify({ error: "Bad request", detail: String(err) }), {
-          status: 400,
-          headers: { ...headers, "Content-Type": "application/json" },
-        });
+        console.error("/api/generate failed", err);
+        return new Response(
+          JSON.stringify({ error: "AI generation failed", detail: String(err) }),
+          {
+            status: 502,
+            headers: { ...headers, "Content-Type": "application/json" },
+          }
+        );
       }
     }
 
